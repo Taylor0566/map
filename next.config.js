@@ -20,14 +20,22 @@ const nextConfig = {
       },
     ];
   },
-  // 配置静态资源目录 - 修改确保静态资源可访问
-  // 这样可以通过/data/访问public/data目录下的文件
-  // 包括GeoJSON文件
+  // 配置静态资源目录和API代理
   async rewrites() {
     return [
       {
         source: '/data/:path*',
         destination: '/data/:path*',
+      },
+      // 添加天地图WFS服务代理
+      {
+        source: '/api/tianditu-wfs',
+        destination: 'http://gisserver.tianditu.gov.cn/TDTService/wfs',
+      },
+      // 添加天地图瓦片服务代理
+      {
+        source: '/tianditu/:path*',
+        destination: 'https://t0.tianditu.gov.cn/:path*',
       }
     ];
   },

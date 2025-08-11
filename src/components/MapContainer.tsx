@@ -14,6 +14,8 @@ import { useLayerDataMap } from '../hooks/useLayerDataMap';
 import { useGeoJsonLoader } from '../hooks/useGeoJsonLoader';
 import { BottomControlBar } from './controls/BottomControlBar';
 import GeoJsonLayer from './layers/GeoJsonLayer';
+import HistoryMapLayer from './map/HistoryMapLayer';
+import RouteLayer from './routing/RouteLayer';
 
 /**
  * 地图容器组件属性接口
@@ -83,6 +85,11 @@ const MapContainer: React.FC = () => {
   const chartOverlays = useMapStore(s => s.chartOverlays);
   const setChartOverlays = useMapStore(s => s.setChartOverlays);
   const geoJsonData = useMapStore(s => s.geoJsonData);
+  // 历史地图状态
+  const historyMaps = useMapStore(s => s.historyMaps);
+  const activeHistoryMapId = useMapStore(s => s.activeHistoryMapId);
+  // 路线规划状态
+  const currentRoute = useMapStore(s => s.currentRoute);
 
   // 集成全局数据hooks
   const layerDataMap = useLayerDataMap();
@@ -116,10 +123,12 @@ const MapContainer: React.FC = () => {
     setChartOverlays(chartOverlays.filter((_, i) => i !== index));
   };
 
-  const toolbarItems: { id: 'search' | 'draw' | 'layers'; name: string }[] = [
+  const toolbarItems: { id: 'search' | 'draw' | 'layers' | 'history' | 'routing'; name: string }[] = [
     { id: 'search', name: '搜索' },
     { id: 'draw', name: '绘制' },
-    { id: 'layers', name: '图层' }
+    { id: 'layers', name: '图层' },
+    { id: 'history', name: '历史' },
+    { id: 'routing', name: '路线' }
   ];
 
   return (
@@ -128,6 +137,7 @@ const MapContainer: React.FC = () => {
         ref={mapRef}
         onMapLoaded={() => setMapLoaded(true)}
       />
+      
       {/* 自动渲染所有可见的GeoJSON图层 */}
       {mapLoaded && layers.filter(l => l.type === 'geojson' && l.visible).map(layer => {
         const region = layer.region as keyof typeof geoJsonData;
@@ -144,18 +154,40 @@ const MapContainer: React.FC = () => {
           />
         );
       })}
-      <LocationControl mapLoaded={mapLoaded} tiandituMapRef={mapRef} />
-      <SidebarContainer mapRef={mapRef} />
-      {/* <LayerManager />  // 已移除，避免重复渲染 */}
-      <DataPanelManager />
-      <ChartOverlayManager map={mapRef.current?.getMap?.()} />
-      {mapLoaded && (
-        <BottomControlBar
-          tools={toolbarItems}
-          activeTool={sidebar.type}
-          onToolSelect={type => setSidebar({ isOpen: true, type })}
+      
+      {/* 渲染历史地图图层 */}
+      {mapLoaded && historyMaps.filter(map => map.visible).map(map => (
+        <HistoryMapLayer
+          key={map.id}
+          map={mapRef.current?.getMap?.()}
+          id={map.id}
+          year={map.year}
+          visible={map.visible}
+          opacity={map.opacity || 0.7}
+        />
+      ))}
+      
+      {/* 渲染路线规划图层 */}
+      {mapLoaded && currentRoute && (
+        <RouteLayer
+          map={mapRef.current?.getMap?.()}
+          route={currentRoute}
+          visible={true}
         />
       )}
+      
+      <LocationControl mapLoaded={mapLoaded} tiandituMapRef={mapRef} />
+      <SidebarContainer mapRef={mapRef} />
+      
+      <DataPanelManager />
+      <ChartOverlayManager map={mapRef.current?.getMap?.()} />
+      
+      {/* 始终显示底部控制栏，而不是依赖mapLoaded状态 */}
+      <BottomControlBar
+        tools={toolbarItems}
+        activeTool={sidebar.type}
+        onToolSelect={type => setSidebar({ isOpen: true, type })}
+      />
     </div>
   );
 };

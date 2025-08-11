@@ -2,6 +2,8 @@ import React from 'react';
 import { SearchSidebar } from './SearchSidebar';
 import DrawingSidebar from './DrawingSidebar';
 import LayersSidebar from './LayersSidebar';
+import HistorySidebar from './HistorySidebar';
+import RoutingSidebar from './RoutingSidebar';
 import { useMapStore } from '../../stores/mapStore';
 
 const SidebarContainer: React.FC<{ mapRef: React.MutableRefObject<any> }> = ({ mapRef }) => {
@@ -45,6 +47,12 @@ const SidebarContainer: React.FC<{ mapRef: React.MutableRefObject<any> }> = ({ m
         onLayerClick={handleLayerClick}
       />
     );
+  }
+  if (sidebar.type === 'history') {
+    return <HistorySidebar onClose={handleClose} />;
+  }
+  if (sidebar.type === 'routing') {
+    return <RoutingSidebar onClose={handleClose} mapRef={mapRef} />;
   }
   return null;
 };

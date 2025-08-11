@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Search, PenTool } from 'lucide-react';
+import { Layers, Search, PenTool, History, Navigation } from 'lucide-react';
 
 /**
  * 底部控制栏容器样式
@@ -61,14 +61,14 @@ const infoBarStyle: React.CSSProperties = {
 };
 
 interface ToolButton {
-  id: 'search' | 'draw' | 'layers';
+  id: 'search' | 'draw' | 'layers' | 'history' | 'routing';
   name: string;
 }
 
 interface BottomControlBarProps {
   tools: ToolButton[];
   activeTool: string | null;
-  onToolSelect: (toolId: 'search' | 'draw' | 'layers') => void;
+  onToolSelect: (toolId: 'search' | 'draw' | 'layers' | 'history' | 'routing') => void;
 }
 
 /**
@@ -86,29 +86,32 @@ export const BottomControlBar: React.FC<BottomControlBarProps> = ({
     bottom: '20px',
     left: '50%',
     transform: 'translateX(-50%)',
-    zIndex: 1000,
+    zIndex: 9999,
     display: 'flex',
     backgroundColor: 'white',
     borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-    padding: '6px'
+    boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+    padding: '8px',
+    minWidth: '300px',
+    justifyContent: 'center'
   };
   
   // 控制按钮样式
   const buttonStyle = (isActive: boolean): React.CSSProperties => ({
-    margin: '0 5px',
-    padding: '8px 15px',
-    backgroundColor: isActive ? '#1890ff' : 'transparent',
+    margin: '0 8px',
+    padding: '10px 18px',
+    backgroundColor: isActive ? '#1890ff' : '#f5f5f5',
     color: isActive ? 'white' : '#333',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '14px',
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
     display: 'flex',
     alignItems: 'center',
-    gap: '5px'
+    gap: '8px',
+    boxShadow: isActive ? '0 2px 6px rgba(24, 144, 255, 0.5)' : 'none'
   });
   
   // 获取对应按钮的图标
@@ -117,6 +120,8 @@ export const BottomControlBar: React.FC<BottomControlBarProps> = ({
       case 'search': return <Search size={16} />;
       case 'draw': return <PenTool size={16} />;
       case 'layers': return <Layers size={16} />; 
+      case 'history': return <History size={16} />;
+      case 'routing': return <Navigation size={16} />;
       default: return null;
     }
   };
